@@ -1,0 +1,13 @@
+plugins {
+  :repo("stevearc/oil.nvim") {
+    depends: "nvim-tree/nvim-web-devicons";
+
+    :setup("oil") {
+      columns: ["icon"];
+
+      view_options {
+        show_hidden: true;
+      }
+    }
+  }
+}
