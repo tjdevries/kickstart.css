@@ -1,4 +1,6 @@
 plugins {
+  :repo("rebelot/kanagawa.nvim") {}
+
   :repo("stevearc/oil.nvim") {
     depends: "nvim-tree/nvim-web-devicons";
 
