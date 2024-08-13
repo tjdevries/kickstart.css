@@ -1,5 +1,136 @@
+/* Kickstart.css,
+ * a pure css implementation of (approximately) kickstart.nvim */
+
+:root {
+  --mapleader: " ";
+}
+
+options css {}
+
+options {
+  number: true;
+  relativenumber: false;
+  showmode: false;
+  mouse: 'a';
+  clipboard: 'unnamedplus';
+  breakindent: true;
+  undofile: true;
+  ignorecase: true;
+  smartcase: true;
+  signcolumn: 'yes';
+  updatetime: 250;
+  splitright: true;
+  splitbelow: true;
+  list: true;
+  listchars: 'tab:» ,trail:·,nbsp:␣';
+  inccommand: 'split';
+  cursorline: true;
+  tabstop: 4;
+  shiftwidth: 4;
+
+  css {
+    expandtab: true;
+    shiftwidth: 2;
+    tabstop: 2;
+  }
+
+  lua, javascript, typescript {
+    tabstop: 2;
+  }
+}
+
 plugins {
-  :repo("rebelot/kanagawa.nvim") {}
+  :repo("tpope/vim-sleuth") {}
+
+  :repo("lewis6991/gitsigns.nvim") {
+    :setup("gitsigns") {
+      signs {
+        add { text: '+' }
+        change { text: '~' }
+        delete { text: '_' }
+        topdelete { text: '‾' }
+        changedelete { text: '~' }
+      }
+    }
+  }
+
+  :repo("folke/which-key.nvim") {
+    setup: 'which-key';
+  }
+
+  :repo("nvim-telescope/telescope.nvim") {
+    depends: "nvim-lua/plenary.nvim";
+    setup: 'telescope';
+
+    keymaps {
+      normal {
+        :key('<leader>sh') { command: "Telescope help_tags"; }
+        :key('<leader>sk') { command: "Telescope keymaps"; }
+        :key('<leader>sf') { command: "Telescope find_files"; }
+        :key('<leader>ss') { command: "Telescope builtin"; }
+        :key('<leader>sw') { command: "Telescope grep_string"; }
+        :key('<leader>sg') { command: "Telescope live_grep"; }
+        :key('<leader>sd') { command: "Telescope diagnostics"; }
+        :key('<leader>sr') { command: "Telescope resume"; }
+        :key('<leader>s.') { command: "Telescope oldfiles"; }
+
+        :key('<leader><leader>') {
+          command: "Telescope buffers";
+        }
+
+        /* :key(' /') {
+          desc: "Fuzzily search in current buffer";
+          @call require('telescope.builtin').current_buffer_fuzzy_find {
+            grep_open_files: true;
+            prompt_title: "Live Grep in Open Files";
+          }
+        } */
+
+        :key('s/') {
+          desc: "Search in Open Files";
+          @call require('telescope.builtin').live_grep {
+            grep_open_files: true;
+            prompt_title: "Live Grep in Open Files";
+          }
+        }
+
+        :key('<leader>sn') {
+          desc: "Search Neovim Files";
+          @call require('telescope.builtin').find_files {
+            prompt_title: "Search Neovim DotFiles";
+            cwd: vim-fn-stdpath("config");
+          }
+        }
+      }
+    }
+  }
+
+  :repo("folke/tokyonight.nvim") {
+    config: lua("vim.cmd.colorscheme('tokyonight')");
+  }
+
+  lsp {
+    depends:
+      "neovim/nvim-lspconfig"
+      "williamboman/mason.nvim" 
+      "williamboman/mason-lspconfig.nvim"
+      "WhoIsSethDaniel/mason-tool-installer.nvim";
+
+
+    setup: "mason" "mason-lspconfig";
+
+    :setup("mason-tool-installer") {
+      automatic_installation: true;
+      ensure_installed: ["lua_ls", "gopls"];
+    }
+
+    :config {
+      @call require('mason-lspconfig').setup_handlers {
+        lua_ls: lua('require("lspconfig").lua_ls.setup {}');
+        gopls: lua('require("lspconfig").gopls.setup {}');
+      }
+    }
+  }
 
   :repo("stevearc/oil.nvim") {
     depends: "nvim-tree/nvim-web-devicons";
@@ -10,6 +141,26 @@ plugins {
       view_options {
         show_hidden: true;
       }
+    }
+  }
+}
+
+autocmds {
+  TextYankPost {
+    desc: 'Highlight yanked text';
+
+    /* These are equivalent
+		 * @callback vim.highlight.on_yank; */
+    callback: lua("vim.highlight.on_yank()");
+  }
+}
+
+keymaps {
+  normal {
+    :key("<esc>") { command: "nohlsearch"; }
+
+    :key("<leader>q") {
+      action: lua("vim.diagnostic.setloclist()");
     }
   }
 }
